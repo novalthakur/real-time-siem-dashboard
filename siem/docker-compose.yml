@@ -1,0 +1,31 @@
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - siem_data:/app/data
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DB_PATH=/app/data/siem.db
+    depends_on:
+      - redis
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - DANGEROUSLY_DISABLE_HOST_CHECK=true
+    depends_on:
+      - backend
+
+volumes:
+  siem_data:
